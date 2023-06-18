@@ -72,12 +72,25 @@ const PersonForm = ({
     </form>
   )
 }
+
+const Notification = ({ message }) => {
+  if (message[0] === null) {
+    return null
+  }
+  const messageStyle = message[1] ? 'message' : 'error'
+  return (
+    <div className={messageStyle}>
+      {message}
+    </div>
+  )
+}
  
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState([null,true])
 
   useEffect(() => {
     personService
@@ -101,8 +114,12 @@ const App = () => {
             setPersons(persons.map(person => person.id !== returnedPerson.id ? person : returnedPerson))
             setNewName('')
             setNewNumber('')
+            setMessage([`Updated ${returnedPerson.name}`,true])
+            setTimeout(() => {
+              setMessage([null,true])
+            }, 5000)
           }).catch(error => {
-            alert(console.log(error))
+            setMessage([`Information of ${person.name} has already been removed from server`,false])
           })
       }
     }else{
@@ -116,8 +133,12 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          setMessage([`Added ${returnedPerson.name}`,true])
+          setTimeout(() => {
+            setMessage([null,true])
+          }, 5000)
         }).catch(error => {
-          alert(console.log(error))
+          setMessage([error.response.data.error,false])
         })
     }
   }
@@ -140,6 +161,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <Filter filter={filter} handleFilterChange={handleFilterChange}/>
 
       <h2>add a new</h2>
